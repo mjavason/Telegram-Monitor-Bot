@@ -48,7 +48,7 @@ async function startBot() {
   console.log('Telegram game bot started!');
   telegramWelcomeCommand(bot);
   bot.start();
-  setInterval(() => sendMessage(`Proof of life [${Date.now()}]`), 1000 * 60 * 60 * 2); //Proof of life every 2 hours
+  setInterval(() => sendMessage(`Proof of life [${Date.now()}]`), 1000 * 60 * 60 * 4); //Proof of life every 4 hours
 }
 
 async function sendMessage(message: string) {
@@ -58,7 +58,7 @@ async function sendMessage(message: string) {
 
 /**
  * @swagger
- * /report/{appName}:
+ * /report/{app}:
  *   post:
  *     summary: Submit application data
  *     description: Accepts application name as a parameter and arbitrary JSON data in the body. Returns the input as a JSON string.
@@ -86,16 +86,16 @@ async function sendMessage(message: string) {
  *       400:
  *         description: Bad request, invalid input.
  */
-app.post('/report/:appName', (req: Request, res: Response) => {
-  const { appName } = req.params;
+app.post('/report/:app', (req: Request, res: Response) => {
+  const { app } = req.params;
   const body = req.body;
 
-  if (!appName) {
+  if (!app) {
     return res.status(400).json({ error: 'Application name is required' });
   }
 
   const response = {
-    appName,
+    app,
     body,
   };
 
