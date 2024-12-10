@@ -42,9 +42,16 @@ app.post('/report/:app', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Application name is required' });
   }
 
-  const report = JSON.stringify({ app, body });
-  sendMessage(report);
-  res.json({ success: true, report });
+  const report = { app, body };
+
+  // Send formatted report as a Telegram message
+  sendMessage(JSON.stringify(report, null, 2)); // Indentation of 2 spaces for readability
+
+  // Respond with formatted JSON
+  res.send({
+    success: true,
+    report: JSON.stringify(report), // Indentation of 2 spaces for response formatting
+  });
 });
 
 app.get('/', (_, res) => res.json({ message: 'API is Live!' }));
