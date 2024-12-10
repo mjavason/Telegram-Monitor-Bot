@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
-import { Bot, Context, GrammyError, HttpError } from 'grammy';
+import { Bot, Context } from 'grammy';
 import { setupSwagger } from './swagger.config';
 import { pingSelf } from './functions';
 
@@ -37,7 +37,7 @@ function telegramWelcomeCommand(bot: Bot) {
   bot.command('start', (ctx) => {
     console.log(ctx.from);
 
-    const message = `Hello, welcome, our bot is live.`;
+    const message = `Monitor Bot is Live!`;
     ctx.reply(message);
 
     if (!owner) owner = ctx;
@@ -48,12 +48,60 @@ async function startBot() {
   console.log('Telegram game bot started!');
   telegramWelcomeCommand(bot);
   bot.start();
-  setInterval(() => sendMessage('hello'), 10000);
+  setInterval(() => sendMessage(`Proof of life [${Date.now()}]`), 1000 * 60 * 60 * 2); //Proof of life every 2 hours
 }
 
 async function sendMessage(message: string) {
+  console.log(message);
   if (owner) owner.reply(message);
 }
+
+/**
+ * @swagger
+ * /report/{appName}:
+ *   post:
+ *     summary: Submit application data
+ *     description: Accepts application name as a parameter and arbitrary JSON data in the body. Returns the input as a JSON string.
+ *     parameters:
+ *       - in: path
+ *         name: appName
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The name of the application
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             description: Arbitrary JSON payload
+ *     responses:
+ *       200:
+ *         description: Returns the received parameters and body as a JSON string.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *       400:
+ *         description: Bad request, invalid input.
+ */
+app.post('/report/:appName', (req: Request, res: Response) => {
+  const { appName } = req.params;
+  const body = req.body;
+
+  if (!appName) {
+    return res.status(400).json({ error: 'Application name is required' });
+  }
+
+  const response = {
+    appName,
+    body,
+  };
+
+  sendMessage(JSON.stringify(response));
+  return res.send({ success: true, report: JSON.stringify(response) });
+});
 //#endregion
 
 //#region Server Setup
