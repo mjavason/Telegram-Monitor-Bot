@@ -2,8 +2,12 @@
 Deploy once, use everywhere. Telegram bot to monitor all your apps and make reports straight to your DM.
 
 **Prerequisites**
-
+- Create a Telegram Bot, you'll recieve a token, add it to the env
 - Node.js and npm (or yarn) installed on your system. You can download them from the [official Node.js website](https://nodejs.org).
+- Run the app
+- Go to your telegram bot and click start, you're set as the sole owner
+- Any messages that go to the API are also sent to your DM
+- Enjoy!
 
 **Installation**
 
