@@ -45,12 +45,13 @@ app.post('/report/:app', (req: Request, res: Response) => {
   const report = { app, body };
 
   // Send formatted report as a Telegram message
-  sendMessage(JSON.stringify(report, null, 2)); // Indentation of 2 spaces for readability
+  // sendMessage(JSON.stringify(report, null, 2)); // Indentation of 2 spaces for readability
+  sendMessage(JSON.stringify(report));
 
   // Respond with formatted JSON
   res.send({
     success: true,
-    report: JSON.stringify(report), // Indentation of 2 spaces for response formatting
+    report: JSON.stringify(report),
   });
 });
 
