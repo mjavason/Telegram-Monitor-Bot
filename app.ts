@@ -6,15 +6,17 @@ import cors from 'cors';
 import { setupSwagger } from './swagger.config';
 import { pingSelf } from './functions';
 
+// Load environment variables
 dotenv.config();
 
+// Constants
 const app = express();
 const PORT = process.env.PORT || 5000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const bot = new Bot(TELEGRAM_BOT_TOKEN);
-let owner: Context;
 const queue: string[] = [];
+let owner: Context | undefined;
 let lastProcessedMessage: string | null = null;
 let duplicateCount = 0;
 let duplicateThreshold = 3;
@@ -32,23 +34,27 @@ bot.command('start', (ctx) => {
 });
 bot.start();
 
-// Helper Function to Send Telegram Message
+// Helper: Send Telegram Message
 const sendMessage = (message: string) => {
-  owner?.reply(message);
-  console.log(message);
+  if (owner) {
+    owner.reply(message);
+    // console.log(`Message sent: ${message}`);
+  } else {
+    console.log(`No owner: ${message}`);
+  }
 };
 
-// Function to process the queue
-function startQueueProcessor() {
+// Process the queue
+const startQueueProcessor = () => {
   setInterval(() => {
     if (queue.length > 0) {
-      const report = queue.shift(); // Remove the first item from the queue
-      if (report) sendMessage(report);
+      const message = queue.shift();
+      if (message) sendMessage(message);
     }
-  }, 1000); // Process one message every second
-}
+  }, 1000); // Process one message per second
+};
 
-// Routes
+// Route: Handle Incoming Reports
 app.post('/report/:app', (req: Request, res: Response) => {
   const { app } = req.params;
   const body = req.body;
@@ -59,6 +65,7 @@ app.post('/report/:app', (req: Request, res: Response) => {
 
   const report = JSON.stringify({ app, body });
 
+  // Handle duplicates
   if (report !== lastProcessedMessage) {
     queue.push(report);
     lastProcessedMessage = report;
@@ -66,7 +73,6 @@ app.post('/report/:app', (req: Request, res: Response) => {
     duplicateThreshold = 3;
   } else {
     duplicateCount++;
-
     if (duplicateCount >= duplicateThreshold) {
       queue.push(`dup x${duplicateCount}`);
       duplicateCount = 0;
@@ -74,24 +80,21 @@ app.post('/report/:app', (req: Request, res: Response) => {
     }
   }
 
-  // Respond with formatted JSON
-  res.send({
-    success: true,
-    report: report,
-  });
+  res.json({ success: true, report });
 });
 
+// Route: Health Check
 app.get('/', (_, res) => res.json({ message: 'API is Live!' }));
 
-// Error Handling
+// Global Error Handling
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err.message);
   res.status(500).json({ success: false, message: err.message });
 });
 
-// Server Start
+// Start Server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on ${BASE_URL}`);
   setInterval(() => sendMessage(`Proof of life [${Date.now()}]`), 4 * 60 * 60 * 1000); // Every 4 hours
   setInterval(() => pingSelf(BASE_URL), 600000); // Ping every 10 minutes
   startQueueProcessor();
