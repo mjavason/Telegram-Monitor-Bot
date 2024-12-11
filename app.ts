@@ -74,7 +74,7 @@ app.post('/report/:app', (req: Request, res: Response) => {
   } else {
     duplicateCount++;
     if (duplicateCount >= duplicateThreshold) {
-      queue.push(`dup x${duplicateCount}`);
+      queue.push(`x${duplicateCount}`);
       duplicateCount = 0;
       duplicateThreshold = Math.min(duplicateThreshold * 3, 1000); // Scale threshold (capped at 1000)
     }
