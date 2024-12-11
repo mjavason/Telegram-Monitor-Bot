@@ -1,58 +1,125 @@
 # Telegram-Monitor-Bot
-Deploy once, use everywhere. Telegram bot to monitor all your apps and make reports straight to your DM.
 
-**Prerequisites**
-- Create a Telegram Bot, you'll recieve a token, add it to the env
-- Node.js and npm (or yarn) installed on your system. You can download them from the [official Node.js website](https://nodejs.org).
-- Run the app
-- Go to your telegram bot and click start, you're set as the sole owner
-- Any messages that go to the API are also sent to your DM
-- Enjoy!
+Deploy once, use everywhere. A Telegram bot to monitor all your apps and send reports straight to your DM.
 
-**Installation**
+## Prerequisites
 
-1. Clone this repository using git:
+- **Telegram Bot**: Create a Telegram bot and obtain its token. Add it to the `.env` file as `TELEGRAM_BOT_TOKEN`.
+- **Node.js and npm/yarn**: Ensure Node.js and npm (or yarn) are installed. Download them from the [official Node.js website](https://nodejs.org).
+
+## Features
+
+- Sends API reports directly to your Telegram DM.
+- Seamlessly integrates with any application.
+- Periodically provides "proof of life" updates.
+- Offers Swagger-based API documentation for easy reference.
+
+## Installation
+
+1. Clone this repository:
 
    ```bash
-   git clone https://github.com/mjavason/...
+   git clone https://github.com/mjavason/telegram-monitor-bot.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd project-name...
+   cd telegram-monitor-bot
    ```
 
-3. Install the project's dependencies:
+3. Install the dependencies:
 
    ```bash
    npm install
    ```
 
-**Running the project**
+4. Create a `.env` file in the project root and configure it with the following variables:
 
-There are four main scripts defined in this project's `package.json` file:
+   ```env
+   TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+   PORT=5000
+   BASE_URL=http://localhost:5000
+   ```
 
-- **npm run dev**
+## Running the Project
 
-  - This script is used for development purposes. It will start a development server and enable hot reloading.
+### Development Mode
 
-- **npm run build**
+Run the project with hot-reloading for development:
 
-  - This script is used to build the project for production. It will bundle your code, minify files, and store them in a 'build' folder.
+```bash
+npm run dev
+```
 
-- **npm run start**
+### Build for Production
 
-  - This script starts the application in production mode. It's what you would typically run after building the project for deployment.
+Generate a production-ready build:
 
-- **npm run test**
-  - This script runs the project's tests. Make sure you've installed the packages before running this script.
+```bash
+npm run build
+```
 
-**API Documentation**
+### Start in Production Mode
 
-After starting the API, you can access the documentation at the `/docs` route. Open your browser and go to [http://localhost:5000/docs](http://localhost:5000/docs) to view the API documentation.
+Run the app using the production build:
 
-**Additional Notes**
+```bash
+npm run start
+```
 
-- Refer to the `package.json` file for any additional scripts specific to this project.
-- Configuration files (e.g., `.env`) might be required for the project to run properly. Take a look at the `env.sample` file for a guide. Make sure you have them set up according to your environment.
+### Testing
+
+Run the test suite to ensure functionality:
+
+```bash
+npm run test
+```
+
+## Usage
+
+1. Start the application using one of the commands above.
+2. Open your Telegram bot and send the `/start` command to set yourself as the bot owner.
+3. Use the provided API endpoints to send reports.
+
+### API Endpoints
+
+#### POST `/report/:app`
+
+Send a report to the bot.
+
+- **Parameters**: `app` (required) - The name of the application.
+- **Body**: JSON payload containing the report details.
+- **Example**:
+
+   ```bash
+   curl -X POST http://localhost:5000/report/my-app \
+     -H "Content-Type: application/json" \
+     -d '{"status": "All systems operational"}'
+   ```
+
+#### GET `/`
+
+Check if the API is live.
+
+- **Response**:
+
+   ```json
+   {
+     "message": "API is Live!"
+   }
+   ```
+
+## API Documentation
+
+Comprehensive API documentation is auto-generated and accessible at `/docs`. Open your browser and navigate to:
+
+[http://localhost:5000/docs](http://localhost:5000/docs)
+
+## Additional Notes
+
+- **Periodic Updates**: The bot sends "proof of life" updates to Telegram every 4 hours.
+- **Self-Ping**: The application pings itself every 10 minutes to prevent idling.
+- **Configuration**: Review the `env.sample` file for guidance on setting up your `.env` file correctly.
+
+Enjoy seamless monitoring with **Telegram-Monitor-Bot**!
