@@ -1,4 +1,4 @@
-import 'express-async-errors'
+import 'express-async-errors';
 import express, { Request, Response, NextFunction } from 'express';
 import { Bot, Context } from 'grammy';
 import dotenv from 'dotenv';
@@ -14,6 +14,7 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const bot = new Bot(TELEGRAM_BOT_TOKEN);
 let owner: Context;
+const queue: { app: string; body: any }[] = [];
 
 // Middleware
 app.use(express.json());
@@ -44,10 +45,7 @@ app.post('/report/:app', (req: Request, res: Response) => {
   }
 
   const report = { app, body };
-
-  // Send formatted report as a Telegram message
-  // sendMessage(JSON.stringify(report, null, 2)); // Indentation of 2 spaces for readability
-  sendMessage(JSON.stringify(report));
+  queue.push(report);
 
   // Respond with formatted JSON
   res.send({
@@ -69,4 +67,12 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   setInterval(() => sendMessage(`Proof of life [${Date.now()}]`), 4 * 60 * 60 * 1000); // Every 4 hours
   setInterval(() => pingSelf(BASE_URL), 600000); // Ping every 10 minutes
+  setInterval(() => {
+    if (queue.length > 0) {
+      const report = queue.shift(); // Remove the first item from the queue
+      if (report) {
+        sendMessage(JSON.stringify(report));
+      }
+    }
+  }, 1000); // Process one message every second
 });
