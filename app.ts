@@ -14,7 +14,10 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const bot = new Bot(TELEGRAM_BOT_TOKEN);
 let owner: Context;
-const queue: { app: string; body: any }[] = [];
+const queue: string[] = [];
+let lastProcessedMessage: string | null = null;
+let duplicateCount = 0;
+let duplicateThreshold = 3;
 
 // Middleware
 app.use(express.json());
@@ -35,6 +38,16 @@ const sendMessage = (message: string) => {
   console.log(message);
 };
 
+// Function to process the queue
+function startQueueProcessor() {
+  setInterval(() => {
+    if (queue.length > 0) {
+      const report = queue.shift(); // Remove the first item from the queue
+      if (report) sendMessage(report);
+    }
+  }, 1000); // Process one message every second
+}
+
 // Routes
 app.post('/report/:app', (req: Request, res: Response) => {
   const { app } = req.params;
@@ -44,13 +57,27 @@ app.post('/report/:app', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Application name is required' });
   }
 
-  const report = { app, body };
-  queue.push(report);
+  const report = JSON.stringify({ app, body });
+
+  if (report !== lastProcessedMessage) {
+    queue.push(report);
+    lastProcessedMessage = report;
+    duplicateCount = 0;
+    duplicateThreshold = 3;
+  } else {
+    duplicateCount++;
+
+    if (duplicateCount >= duplicateThreshold) {
+      queue.push(`dup x${duplicateCount}`);
+      duplicateCount = 0;
+      duplicateThreshold = Math.min(duplicateThreshold * 3, 1000); // Scale threshold (capped at 1000)
+    }
+  }
 
   // Respond with formatted JSON
   res.send({
     success: true,
-    report: JSON.stringify(report),
+    report: report,
   });
 });
 
@@ -67,12 +94,5 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   setInterval(() => sendMessage(`Proof of life [${Date.now()}]`), 4 * 60 * 60 * 1000); // Every 4 hours
   setInterval(() => pingSelf(BASE_URL), 600000); // Ping every 10 minutes
-  setInterval(() => {
-    if (queue.length > 0) {
-      const report = queue.shift(); // Remove the first item from the queue
-      if (report) {
-        sendMessage(JSON.stringify(report));
-      }
-    }
-  }, 1000); // Process one message every second
+  startQueueProcessor();
 });
