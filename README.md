@@ -12,7 +12,6 @@ Deploy once, use everywhere. A Telegram bot to monitor all your apps and send re
 - Sends API reports directly to your Telegram DM.
 - Seamlessly integrates with any application.
 - Periodically provides "proof of life" updates.
-- Offers Swagger-based API documentation for easy reference.
 
 ## Installation
 
@@ -109,12 +108,6 @@ Check if the API is live.
      "message": "API is Live!"
    }
    ```
-
-## API Documentation
-
-Comprehensive API documentation is auto-generated and accessible at `/docs`. Open your browser and navigate to:
-
-[http://localhost:5000/docs](http://localhost:5000/docs)
 
 ## Additional Notes
 
