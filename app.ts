@@ -3,7 +3,6 @@ import express, { Request, Response, NextFunction } from 'express';
 import { Bot, Context } from 'grammy';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { setupSwagger } from './swagger.config';
 import { pingSelf } from './functions';
 
 // Load environment variables
@@ -16,16 +15,15 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const bot = new Bot(TELEGRAM_BOT_TOKEN);
 const queue: string[] = [];
-let owner: Context | undefined;
-let lastProcessedMessage: string | null = null;
 let duplicateCount = 0;
 let duplicateThreshold = 3;
+let lastProcessedMessage: string | null = null;
+let owner: Context | undefined;
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-setupSwagger(app, BASE_URL);
 
 // Telegram Bot Setup
 bot.command('start', (ctx) => {
@@ -58,11 +56,6 @@ const startQueueProcessor = () => {
 app.post('/report/:app', (req: Request, res: Response) => {
   const { app } = req.params;
   const body = req.body;
-
-  if (!app) {
-    return res.status(400).json({ error: 'Application name is required' });
-  }
-
   const report = JSON.stringify({ app, body });
 
   // Handle duplicates
