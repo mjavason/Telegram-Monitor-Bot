@@ -77,7 +77,9 @@ app.post('/report/:app', (req: Request, res: Response) => {
 });
 
 // Route: Health Check
-app.get('/', (res: any) => res.json({ message: 'API is Live!' }));
+app.get('/', (_req, res: Response) => {
+  res.json({ message: 'API is Live!' });
+});
 
 // Global Error Handling
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
